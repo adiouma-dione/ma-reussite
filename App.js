@@ -74,7 +74,7 @@ const App = () => {
       {/* <SelectedChildProvider> */}
       <Text>Token: {expoPushToken?.data ?? ""}</Text>
       <Text>Notification: {data}</Text>
-      <AppNavigator />
+      {/* <AppNavigator /> */}
       {/* </SelectedChildProvider> */}
     </NativeBaseProvider>
   );
