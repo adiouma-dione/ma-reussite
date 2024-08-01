@@ -6,6 +6,18 @@ import * as SplashScreen from "expo-splash-screen";
 import useFonts from "./src/hooks/useFonts";
 import AppNavigator from "./src/navigation/AppNavigator";
 import customTheme from "./src/themes/customTheme";
+// import { SelectedChildProvider } from "./src/hooks/SelectedChildContext";
+import OneSignal from "react-native-onesignal";
+import Constants from "expo-constants";
+
+// Initialiser OneSignal avec votre ID d'application
+OneSignal.setLogLevel(6, 0);
+OneSignal.setAppId(Constants.expoConfig.extra.oneSignalAppId);
+
+// Activer les notifications
+OneSignal.promptForPushNotificationsWithUserResponse((response) => {
+  console.log("Notification permission:", response);
+});
 
 SplashScreen.preventAutoHideAsync();
 
@@ -57,6 +69,19 @@ const App = () => {
     if (currentPolicyVersion) checkPolicyAcceptance();
     if (fontsLoaded && currentPolicyVersion) SplashScreen.hideAsync();
   }, [fontsLoaded, currentPolicyVersion]);
+
+  useEffect(() => {
+    OneSignal.setNotificationOpenedHandler((notification) => {
+      console.log("Notification ouverte:", notification);
+    });
+
+    OneSignal.setNotificationWillShowInForegroundHandler(
+      (notificationReceivedEvent) => {
+        let notification = notificationReceivedEvent.getNotification();
+        console.log("Notification reçue:", notification);
+      }
+    );
+  }, []);
 
   if (!fontsLoaded) {
     return null;

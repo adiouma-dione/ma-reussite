@@ -1,0 +1,9 @@
+Google Android (FCM) Configuration
+1. Install the SDK
+Read our 
+React Native / Expo documentation
+ to learn how to install the SDK.
+Your App ID: 41b8ded4-0054-4d9b-a3d2-ac8e943c0c60
+2. Test for Subscribed Users
+Build and run your app. The OneSignal SDK, once set up correctly, will automatically handle subscribing your device to notifications.
+

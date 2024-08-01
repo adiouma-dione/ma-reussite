@@ -17,14 +17,28 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.adiouma.mareussite"
+      "bundleIdentifier": "com.adiouma.mareussite",
+      "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        },
+        "UIBackgroundModes": [
+          "fetch",
+          "remote-notification"
+        ],
+        "NSUserTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.adiouma.mareussite"
+      "package": "com.adiouma.mareussite",
+      "permissions": [
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -32,8 +46,17 @@
     "extra": {
       "eas": {
         "projectId": "c3839f5f-66c2-44fc-b0b6-f7f977ea623e"
-      }
+      },
+      "oneSignalAppId": "41b8ded4-0054-4d9b-a3d2-ac8e943c0c60"
     },
-    "owner": "adiouma"
+    "owner": "adiouma",
+    "plugins": [
+      [
+        "onesignal-expo-plugin",
+        {
+          "mode": "development"
+        }
+      ]
+    ]
   }
 }
