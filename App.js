@@ -6,12 +6,15 @@ import * as SplashScreen from "expo-splash-screen";
 import useFonts from "./src/hooks/useFonts";
 import AppNavigator from "./src/navigation/AppNavigator";
 import customTheme from "./src/themes/customTheme";
+import { usePushNotifications } from "./src/hooks/usePushNotifications";
 
 SplashScreen.preventAutoHideAsync();
 
 const App = () => {
   const [policyAccepted, setPolicyAccepted] = useState(false);
   const [currentPolicyVersion, setCurrentPolicyVersion] = useState(null);
+  const { expoPushToken, notification } = usePushNotifications();
+  const data = JSON.stringify(notification, undefined, 2);
 
   const handleWebViewMessage = (event) => {
     const policyVersion = event.nativeEvent.data;
@@ -69,6 +72,8 @@ const App = () => {
   return (
     <NativeBaseProvider isSSR theme={customTheme}>
       {/* <SelectedChildProvider> */}
+      <Text>Token: {expoPushToken?.data ?? ""}</Text>
+      <Text>Notification: {data}</Text>
       <AppNavigator />
       {/* </SelectedChildProvider> */}
     </NativeBaseProvider>

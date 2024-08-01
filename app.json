@@ -24,7 +24,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.adiouma.mareussite"
+      "package": "com.adiouma.mareussite",
+      "googleServicesFile" : "./android/app/google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png"

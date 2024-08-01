@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "211746721206",
+    "project_id": "ma-reussite-33026",
+    "storage_bucket": "ma-reussite-33026.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:211746721206:android:c1b1961f8640d5a0de0517",
+        "android_client_info": {
+          "package_name": "com.adiouma.mareussite"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyArOmenC9Q2r0CmfpvExEFvKoY2Rjp_zhM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
