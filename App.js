@@ -10,20 +10,22 @@ import customTheme from "./src/themes/customTheme";
 import OneSignal from "react-native-onesignal";
 import Constants from "expo-constants";
 
-// Initialiser OneSignal avec votre ID d'application
-OneSignal.setLogLevel(6, 0);
-OneSignal.setAppId(Constants.expoConfig.extra.oneSignalAppId);
-
-// Activer les notifications
-OneSignal.promptForPushNotificationsWithUserResponse((response) => {
-  console.log("Notification permission:", response);
-});
-
 SplashScreen.preventAutoHideAsync();
 
 const App = () => {
   const [policyAccepted, setPolicyAccepted] = useState(false);
   const [currentPolicyVersion, setCurrentPolicyVersion] = useState(null);
+
+  // // Initialiser OneSignal avec votre ID d'application
+  // OneSignal.setLogLevel(6, 0);
+  // OneSignal.setAppId(Constants.expoConfig.extra.oneSignalAppId);
+
+  // // Activer les notifications
+  // OneSignal.promptForPushNotificationsWithUserResponse((response) => {
+  //   console.log("Notification permission:", response);
+  // });
+
+  OneSignal.initialize("41b8ded4-0054-4d9b-a3d2-ac8e943c0c60");
 
   const handleWebViewMessage = (event) => {
     const policyVersion = event.nativeEvent.data;
