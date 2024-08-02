@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, NativeBaseProvider } from "native-base";
+import { Box, Button, Center, NativeBaseProvider, Text } from "native-base";
 import { WebView } from "react-native-webview";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SplashScreen from "expo-splash-screen";
@@ -68,13 +68,18 @@ const App = () => {
   if (!policyAccepted) {
     return <PrivacyPolicyScreen onAccept={handleAccept} />;
   }
-
+  console.log("{expoPushToken?.data}", expoPushToken?.data ?? "");
+  console.log("{data}", data);
   return (
     <NativeBaseProvider isSSR theme={customTheme}>
-      {/* <SelectedChildProvider> */}
-      <Text>Token: {expoPushToken?.data ?? ""}</Text>
-      <Text>Notification: {data}</Text>
-      {/* <AppNavigator /> */}
+      {/* <SelectedChildProvider> 
+      ExponentPushToken[w8C6KyGJ210gEaN877uQ6_]
+      */}
+      {/* <Center flex={1}>
+        <Text color={"black"}>Token: {expoPushToken?.data ?? ""}</Text>
+        <Text color={"black"}>Notification: {data}</Text>
+      </Center> */}
+      <AppNavigator />
       {/* </SelectedChildProvider> */}
     </NativeBaseProvider>
   );

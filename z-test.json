@@ -1,0 +1,67 @@
+{
+    "request": {
+        "trigger": {
+            "remoteMessage": {
+                "originalPriority": 2,
+                "sentTime": 1722537560160,
+                "notification": {
+                    "usesDefaultVibrateSettings": false,
+                    "color": null,
+                    "channelId": null,
+                    "visibility": null,
+                    "sound": null,
+                    "tag": null,
+                    "bodyLocalizationArgs": null,
+                    "imageUrl": null,
+                    "title": "Ma Reussite Push Notification",
+                    "vibrateTimings": null,
+                    "ticker": null,
+                    "eventTime": null,
+                    "body": "Hello Ma Reussite Mobile App, this is a push notification test !!! ",
+                    "titleLocalizationKey": null,
+                    "notificationPriority": null,
+                    "icon": null,
+                    "usesDefaultLightSettings": false,
+                    "sticky": false,
+                    "link": null,
+                    "titleLocalizationArgs": null,
+                    "bodyLocalizationKey": null,
+                    "usesDefaultSound": false,
+                    "clickAction": null,
+                    "localOnly": false,
+                    "lightSettings": null,
+                    "notificationCount": null
+                },
+                "data": {
+                    "message": "Hello Ma Reussite Mobile App, this is a push notification test !!! ",
+                    "title": "Ma Reussite Push Notification",
+                    "body": "{}",
+                    "scopeKey": "@adiouma/ma-reussite",
+                    "experienceId": "@adiouma/ma-reussite",
+                    "projectId": "c3839f5f-66c2-44fc-b0b6-f7f977ea623e"
+                },
+                "to": null,
+                "ttl": 0,
+                "collapseKey": "host.exp.exponent",
+                "messageType": null,
+                "priority": 2,
+                "from": "367315174693",
+                "messageId": "0:1722537560168361%0ac519e60ac519e6"
+            },
+            "channelId": null,
+            "type": "push"
+        },
+        "content": {
+            "title": "Ma Reussite Push Notification",
+            "badge": null,
+            "autoDismiss": true,
+            "data": {},
+            "body": "Hello Ma Reussite Mobile App, this is a push notification test !!! ",
+            "sound": "default",
+            "sticky": false,
+            "subtitle": null
+        },
+        "identifier": "0:1722537560168361%0ac519e60ac519e6"
+    },
+    "date": 1722537560160
+}
