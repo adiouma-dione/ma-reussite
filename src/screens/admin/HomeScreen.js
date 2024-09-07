@@ -25,7 +25,7 @@ const HomeScreen = () => {
   const route = useRoute();
   const [sessionId, setSessionId] = useState(null);
   const [password, setPassword] = useState(null);
-  const [partnerid, setPartnerid] = useState(null);
+  const [userid, setUserid] = useState(null);
   const [events, setEvents] = useState(null);
   const [markedDate, setMarkedDate] = useState({});
   const [todaysEvents, setTodaysEvents] = useState([]);
@@ -34,23 +34,26 @@ const HomeScreen = () => {
   const [selectedDayEvents, setSelectedDayEvents] = useState([]);
 
   useEffect(() => {
-    const connectedUser = route?.params;
-    const { sessionId, email, password, partnerid } = connectedUser;
-    setSessionId(sessionId);
-    setPassword(password);
-    setPartnerid(partnerid[0]);
-  }, [route]);
+    const fetchConnectedUser = async () => {
+      try {
+        const connectedUser = await getObject("connectedUser");
+        const { sessionId, email, password, userid } = connectedUser;
+        setSessionId(sessionId);
+        setPassword(password);
+        setUserid(userid[0]);
+      } catch (error) {}
+    };
+    if (!sessionId) fetchConnectedUser();
+  }, [sessionId]);
 
   useEffect(() => {
-    console.log("connectedUser...", partnerid);
-
     const fetchEvents = async () => {
       try {
         const eventsData = await jsonrpcRequest(
           sessionId,
           password,
           config.model.craftSession,
-          [[["partner_ids", "=", partnerid]]],
+          [[["partner_ids", "=", userid]]],
           [
             "classroom_id",
             "recurrency",
@@ -71,7 +74,7 @@ const HomeScreen = () => {
     if (sessionId && password) {
       fetchEvents();
     }
-  }, [sessionId, password, partnerid]);
+  }, [sessionId, password, userid]);
 
   useEffect(() => {
     if (events) {
@@ -169,7 +172,6 @@ const HomeScreen = () => {
               w="100%"
               flexGrow={1}
               mx={"auto"}
-              // mb={"5%"}
               contentContainerStyle={{ paddingBottom: 40 }}
             >
               <VStack space={4} px={4}>

@@ -16,7 +16,6 @@ const PaymentCardPlus = ({ paymentDetails, occupation = "student" }) => {
         const taxes = await getObject("taxes");
         taxes.forEach((tax) => {
           if (tax.id === paymentDetails.tax_ids[0]) {
-            console.log("tax name = ", tax.name);
             setTaxName(tax.name);
           }
         });
@@ -45,7 +44,7 @@ const PaymentCardPlus = ({ paymentDetails, occupation = "student" }) => {
             </Text>
             <Text color={"black"} mb={2}>
               {occupation === "student" ? "Etudiant(e) : " : "Professeur(e) : "}
-              {paymentDetails.partner_id[1]}
+              {paymentDetails.user_id[1]}
             </Text>
             {/* {taxName && (
               <>

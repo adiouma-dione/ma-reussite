@@ -11,6 +11,7 @@ import {
 import config from "../api/config";
 import { CustomButton, CustomInput, LoginScreenBanner } from "../components";
 import { loginValidationSchema } from "../validation/formValidation";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const LoginScreen = () => {
   const input1Ref = useRef(null);
@@ -23,63 +24,105 @@ const LoginScreen = () => {
     sessionId: "",
     email: "",
     password: "",
-    partnerid: "",
-    groups_id: [],
+    userid: "",
     role: "",
   });
-  const [selectedChild, setSelectedChild] = useState({});
+  const [selectedChild, setSelectedChild] = useState(null);
   const [children, setChildren] = useState([]);
+
+  const getStudentIds = (data) => {
+    return data.map((fetchedChild) => fetchedChild.child_id[0]);
+  };
 
   const handleLogin = async (values) => {
     setLoading(false);
+    const email = values.email;
+    const password = values.password;
+
     try {
-      const sidAdmin = await authenticate();
-      const partner = await jsonrpcRequest(
-        sidAdmin,
-        config.password,
-        config.model.users,
-        [[["email", "=", values.email]]],
-        ["self", "is_student", "is_parent", "groups_id"]
-      );
+      const sessionId = await authenticate(email, password);
 
-      // console.log("partner...", partner);
+      if (sessionId) {
+        const user = await jsonrpcRequest(
+          sessionId,
+          password,
+          config.model.users,
+          [[["email", "=", email]]],
+          ["self", "craft_role", "image_1024"]
+        );
 
-      if (partner.length > 0) {
-        const partnerid = partner[0].self;
-        setError("");
-        const role = partner[0].groups_id.includes(
-          Number(process.env.EXPO_PUBLIC_ADMIN_ID)
-        )
-          ? "admin"
-          : partner[0].groups_id.includes(
-              Number(process.env.EXPO_PUBLIC_TEACHER_ID)
-            )
-          ? "teacher"
-          : partner[0].is_parent
-          ? "parent"
-          : partner[0].is_student
-          ? "student"
-          : "other";
+        if (user.length > 0) {
+          const userid = user[0].self;
+          const role = user[0].craft_role;
+          const imageUri = user[0].image_1024;
 
-        // console.log("role...", role);
+          let userData;
+          switch (role) {
+            case "student":
+              userData = await jsonrpcRequest(
+                sessionId,
+                password,
+                config.model.craftStudent,
+                [[["contact_id", "in", userid]]],
+                ["image_1024"]
+              );
+              break;
 
-        await storeObject("connectedUser", {
-          sessionId: sidAdmin,
-          email: config.username,
-          password: config.password,
-          partnerid: partnerid,
-          groups_id: partner[0].groups_id,
-          role: role,
-        });
+            case "parent":
+              userData = await jsonrpcRequest(
+                sessionId,
+                password,
+                config.model.craftParent,
+                [[["contact_id", "in", userid]]],
+                ["image_1024"]
+              );
+              break;
 
-        setConnectedUser({
-          sessionId: sidAdmin,
-          email: config.username,
-          password: config.password,
-          partnerid: partnerid,
-          groups_id: partner[0].groups_id,
-          role: role,
-        });
+            case "teacher":
+              userData = await jsonrpcRequest(
+                sessionId,
+                password,
+                config.model.craftTeachers,
+                [[["work_contact_id", "=", userid[0]]]],
+                ["image_1024"]
+              );
+              break;
+
+            default:
+              userData = await jsonrpcRequest(
+                sessionId,
+                password,
+                config.model.users,
+                [[["partner_id", "in", userid]]],
+                ["image_1024"]
+              );
+              break;
+          }
+
+          const profileImage = imageUri
+            ? `data:image/png;base64,${imageUri}`
+            : null;
+
+          setError("");
+
+          await storeObject("connectedUser", {
+            sessionId: sessionId,
+            email: email,
+            password: password,
+            userid: userid,
+            role: role,
+            profileImage: profileImage,
+          });
+
+          setConnectedUser({
+            sessionId: sessionId,
+            email: email,
+            password: password,
+            userid: userid,
+            role: role,
+            profileImage: profileImage,
+          });
+        }
       } else {
         setError("Nom d'utilisateur ou mot de passe incorrect !");
       }
@@ -96,33 +139,37 @@ const LoginScreen = () => {
 
     const loadParentData = async () => {
       try {
-        if (!connectedUser) throw new Error("Missing connectedUser data");
+        if (!connectedUser) return;
+
+        const parent = await jsonrpcRequest(
+          connectedUser.sessionId,
+          connectedUser.password,
+          config.model.craftParent,
+          [[["email", "=", connectedUser.email]]],
+          ["id", "child_ids"]
+        );
+
+        if (!parent.length || !parent[0].child_ids.length) return;
+
+        const parentChildIds = parent[0].child_ids;
 
         const fetchedChildren = await jsonrpcRequest(
           connectedUser.sessionId,
           connectedUser.password,
-          config.model.opParents,
-          [[["name", "=", connectedUser.partnerid[0]]]],
-          ["student_ids"]
+          config.model.craftParentChildLine,
+          [[["id", "=", parentChildIds]]],
+          ["child_id", "id"]
         );
 
-        if (!fetchedChildren.length || !fetchedChildren[0].student_ids.length)
-          throw new Error("No children found");
+        const studentIds = getStudentIds(fetchedChildren);
 
-        const studentIds = fetchedChildren[0].student_ids;
-        const students = await jsonrpcRequest(
+        const childrenList = await jsonrpcRequest(
           connectedUser.sessionId,
           connectedUser.password,
-          config.model.opStudent,
-          [],
-          ["id", "partner_id"]
+          config.model.craftStudent,
+          [[["id", "=", studentIds]]],
+          ["id", "contact_id", "image_1024"]
         );
-
-        const childrenList = students.filter((student) =>
-          studentIds.includes(student.id)
-        );
-
-        if (!childrenList.length) throw new Error("No matching students found");
 
         setChildren(childrenList);
         const initialSelectedChild = childrenList[0];
@@ -150,17 +197,6 @@ const LoginScreen = () => {
         );
 
         storeObject("currencies", currencies);
-
-        const taxes = await jsonrpcRequest(
-          connectedUser.sessionId,
-          connectedUser.password,
-          config.model.accountTax,
-          [],
-          ["id", "name"]
-        );
-
-        storeObject("taxes", taxes);
-        // console.log("TAX...", taxes);
       } catch (error) {
         console.error("Error fetching role:", error);
       }
@@ -170,28 +206,15 @@ const LoginScreen = () => {
   }, [connectedUser]);
 
   useEffect(() => {
-    switch (connectedUser?.role) {
-      case "student":
-        navigation.navigate("TabNavigator", connectedUser);
-        break;
-      case "parent":
-        if (children.length > 0 && Object.keys(selectedChild).length > 0) {
-          navigation.navigate("ParentTabNavigator", connectedUser);
-        }
-        break;
-      case "teacher":
-        navigation.navigate("TeacherTabNavigator", connectedUser);
-        break;
-      case "admin":
-        navigation.navigate("AdminTabNavigator", connectedUser);
-        break;
-      default:
-        break;
+    if (connectedUser?.role === "parent" && selectedChild) {
+      navigation.navigate("DrawerNavigator", { connectedUser });
+    } else if (connectedUser?.role) {
+      navigation.navigate("DrawerNavigator", { connectedUser });
     }
-  }, [children, selectedChild, connectedUser]);
+  }, [connectedUser, selectedChild]);
 
   return (
-    <>
+    <SafeAreaView flex={1}>
       <StatusBar backgroundColor={"white"} barStyle={"dark-content"} />
       <LoginScreenBanner />
       <Box height={"100%"}>
@@ -247,7 +270,7 @@ const LoginScreen = () => {
           </Box>
         </VStack>
       </Box>
-    </>
+    </SafeAreaView>
   );
 };
 

@@ -9,7 +9,7 @@ const CustomButton = ({ onPress, title, isDisabled, loading = true }) => {
       ) : (
         <HStack>
           <Spinner size="sm" color="white" />
-          <Text>{` ${title}`}</Text>
+          {/* <Text>{` ${title}`}</Text> */}
         </HStack>
       )}
     </Button>
