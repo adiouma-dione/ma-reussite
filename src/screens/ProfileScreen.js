@@ -19,14 +19,14 @@ import {
   Divider,
   Toast,
   CloseIcon,
-  useToast, // Import de Toast
+  useToast,
 } from "native-base";
 import * as ImagePicker from "expo-image-picker";
-import { getObject, storeObject, updateRecord } from "../api/apiClient"; // Import updateRecord
+import { getObject, storeObject, updateRecord } from "../api/apiClient";
 import MA_REUSSITE_CUSTOM_COLORS from "../themes/variables";
 import * as FileSystem from "expo-file-system";
 import config from "../api/config";
-import { Alert } from "react-native"; // Ajoute cette ligne pour utiliser Alert de React Native
+import { Alert } from "react-native";
 import { ToastAlert } from "../components";
 
 const ProfileScreen = () => {
@@ -53,23 +53,18 @@ const ProfileScreen = () => {
     fetchUser();
   }, []);
 
-  // Fonction pour mettre à jour la photo de profil dans Odoo
   const updateUserProfileImage = async (imageUri) => {
     try {
-      // Lire l'image et la convertir en base64
       const imageBase64 = await FileSystem.readAsStringAsync(imageUri, {
         encoding: FileSystem.EncodingType.Base64,
       });
 
-      // Mettre à jour l'utilisateur dans Odoo
       const response = await updateRecord(
         connectedUser.sessionId,
         connectedUser.password,
-        config.model.partner, // Modèle Odoo
-        connectedUser.userid[0], // ID de l'utilisateur
-        {
-          image_1920: imageBase64, // Champ pour l'image de profil dans Odoo (taille 1920px)
-        }
+        config.model.partner,
+        connectedUser.userid[0],
+        { image_1920: imageBase64 }
       );
 
       if (response) {
@@ -83,87 +78,31 @@ const ProfileScreen = () => {
               status={"success"}
               isClosable={true}
               variant={"left-accent"}
-              duration={50000} // Durée en millisecondes
+              duration={5000}
             />
           ),
         });
-
-        // Toast.show({
-        //   title: "Succès",
-        //   description: "Votre photo de profil a été mise à jour avec succès.",
-        //   status: "success",
-        //   duration: 5000,
-        //   isClosable: true,
-        //   variant: "left-accent",
-        //   placement: "top",
-        // });
-
-        // <Alert
-        //   maxW="400"
-        //   status="success"
-        //   colorScheme="success"
-        //   variant="left-accent"
-        // >
-        //   <VStack space={2} flexShrink={1} w="100%">
-        //     <HStack
-        //       flexShrink={1}
-        //       space={2}
-        //       alignItems="center"
-        //       justifyContent="space-between"
-        //     >
-        //       <HStack flexShrink={1} space={2} alignItems="center">
-        //         <Alert.Icon />
-        //         <Text fontSize="md" fontWeight="medium" color="coolGray.800">
-        //           Succès
-        //         </Text>
-        //       </HStack>
-        //       <IconButton
-        //         variant="unstyled"
-        //         _focus={{
-        //           borderWidth: 0,
-        //         }}
-        //         icon={<CloseIcon size="3" />}
-        //         _icon={{
-        //           color: "coolGray.600",
-        //         }}
-        //       />
-        //     </HStack>
-        //     <Box
-        //       pl="6"
-        //       _text={{
-        //         color: "coolGray.600",
-        //       }}
-        //     >
-        //       Votre photo de profil a été mise à jour avec succès!
-        //     </Box>
-        //   </VStack>
-        // </Alert>;
       }
     } catch (error) {
       console.error(
         "Erreur lors de la mise à jour de la photo de profil :",
         error
       );
-      Toast.show({
+      toast.show({
         title: "Erreur",
         description: "La mise à jour de la photo de profil a échoué.",
         status: "error",
         duration: 5000,
         isClosable: true,
-        variant: "left-accent",
-        placement: "top",
       });
     }
   };
 
-  const handleProfileImagePress = () => {
-    onOpen();
-  };
+  const handleProfileImagePress = () => onOpen();
 
   const pickImage = async () => {
-    const permissionResult =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (permissionResult.granted === false) {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
       Alert.alert(
         "Permissions requises",
         "Vous devez autoriser l'accès à la galerie."
@@ -180,22 +119,17 @@ const ProfileScreen = () => {
 
     if (!result.canceled) {
       const imageUri = result.assets[0].uri;
-      const updatedUser = {
-        ...connectedUser,
-        profileImage: imageUri,
-      };
+      const updatedUser = { ...connectedUser, profileImage: imageUri };
       setConnectedUser(updatedUser);
       await storeObject("connectedUser", updatedUser);
-
-      // Mettre à jour la photo de profil dans Odoo
       await updateUserProfileImage(imageUri);
     }
     onClose();
   };
 
   const takePhoto = async () => {
-    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
-    if (permissionResult.granted === false) {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") {
       Alert.alert(
         "Permissions requises",
         "Vous devez autoriser l'accès à la caméra."
@@ -211,14 +145,9 @@ const ProfileScreen = () => {
 
     if (!result.canceled) {
       const imageUri = result.assets[0].uri;
-      const updatedUser = {
-        ...connectedUser,
-        profileImage: imageUri,
-      };
+      const updatedUser = { ...connectedUser, profileImage: imageUri };
       setConnectedUser(updatedUser);
       await storeObject("connectedUser", updatedUser);
-
-      // Mettre à jour la photo de profil dans Odoo
       await updateUserProfileImage(imageUri);
     }
     onClose();
@@ -230,18 +159,13 @@ const ProfileScreen = () => {
         {loading ? (
           <Avatar
             size="2xl"
-            source={{
-              uri: "https://placehold.co/400x400.png",
-            }}
+            source={{ uri: "https://placehold.co/400x400.png" }}
           />
         ) : (
           <Avatar
             size="xl"
-            bg="blue.500"
-            source={{
-              uri: connectedUser?.profileImage,
-            }}
-            bgColor={MA_REUSSITE_CUSTOM_COLORS.Secondary}
+            bg={MA_REUSSITE_CUSTOM_COLORS.Secondary}
+            source={{ uri: connectedUser?.profileImage }}
           >
             <Avatar.Badge
               bg="white"
@@ -253,91 +177,48 @@ const ProfileScreen = () => {
             >
               <IconButton
                 icon={
-                  <Icon
-                    as={MaterialIcons}
-                    name="edit"
-                    size={4}
-                    color="black"
-                    position="absolute"
-                    top={0.5}
-                    left={0.5}
-                  />
+                  <Icon as={MaterialIcons} name="edit" size={4} color="black" />
                 }
                 borderRadius="full"
-                _icon={{
-                  size: "xs",
-                }}
                 onPress={handleProfileImagePress}
               />
             </Avatar.Badge>
-            <IconButton
-              icon={
-                <Icon
-                  as={MaterialIcons}
-                  name="person"
-                  size="6xl"
-                  color="white"
-                  mx={"auto"}
-                />
-              }
-              borderRadius="full"
-              _icon={{
-                color: "white",
-                size: "xs",
-              }}
-              _pressed={{
-                bg: "primary.600:alpha.20",
-              }}
-            />
           </Avatar>
         )}
-        <Heading color={"black"} mt={2}>
+        <Heading color="black" mt={2}>
           {connectedUser && connectedUser.userid[1]}
         </Heading>
       </Center>
-      <ScrollView
-        mt={2}
-        space={2}
-        h={"full"}
-        w={"full"}
-        contentContainerStyle={{ paddingBottom: 80 }}
-      >
+      <ScrollView mt={2} contentContainerStyle={{ paddingBottom: 80 }}>
         <Box mt={4}>
-          <Heading mx={4} color={"black"} size="md">
+          <Heading mx={4} color="black" size="md">
             Contact
           </Heading>
-          <Box h={"full"} justifyContent={"space-between"}>
-            <VStack mx={4}>
-              <Text mt={2} color={"black"} bold>
-                Adresse email :
-              </Text>
-              <Link href={connectedUser && connectedUser.email}>
-                <Text color={"primary.500"}>
-                  {connectedUser && connectedUser.email}
-                </Text>
-              </Link>
-            </VStack>
-          </Box>
+          <VStack mx={4}>
+            <Text mt={2} color="black" bold>
+              Adresse email :
+            </Text>
+            <Link href={connectedUser?.email}>
+              <Text color="primary.500">{connectedUser?.email}</Text>
+            </Link>
+          </VStack>
         </Box>
       </ScrollView>
 
       <Actionsheet isOpen={isOpen} onClose={onClose}>
         <Actionsheet.Content
-          bgColor={"white"}
-          w={"4/6"}
-          mx={"auto"}
-          borderBottomRadius={"lg"}
-          borderTopRadius={"lg"}
-          mb={4}
+          bg="white"
+          borderBottomRadius="lg"
+          borderTopRadius="lg"
         >
-          <Text my={2} color={"black"}>
+          <Text my={2} color="black">
             Choisir une image
           </Text>
-          <Divider bgColor={"gray.100"} h={0.5} mt={2} />
-          <Actionsheet.Item onPress={pickImage} bgColor={"white"} p={2}>
-            <HStack ml={"5"}>
+          <Divider bg="gray.100" h={0.5} />
+          <Actionsheet.Item onPress={pickImage}>
+            <HStack ml={5}>
               <FontAwesome6
-                name={"image"}
+                name="image"
                 size={18}
                 color={MA_REUSSITE_CUSTOM_COLORS.Secondary}
               />
@@ -346,21 +227,21 @@ const ProfileScreen = () => {
               </Text>
             </HStack>
           </Actionsheet.Item>
-          <Divider bgColor={"gray.100"} h={0.5} />
-          <Actionsheet.Item onPress={takePhoto} bgColor={"white"} p={2}>
-            <HStack ml={"5"}>
+          <Divider bg="gray.100" h={0.5} />
+          <Actionsheet.Item onPress={takePhoto}>
+            <HStack ml={5}>
               <FontAwesome5
-                name={"camera"}
+                name="camera"
                 size={18}
                 color={MA_REUSSITE_CUSTOM_COLORS.Secondary}
               />
-              <Text ml={"8"} color={MA_REUSSITE_CUSTOM_COLORS.Secondary}>
+              <Text ml={8} color={MA_REUSSITE_CUSTOM_COLORS.Secondary}>
                 Caméra
               </Text>
             </HStack>
           </Actionsheet.Item>
         </Actionsheet.Content>
-        <Button mb={6} w={"4/6"} onPress={onClose} bgColor={"white"}>
+        <Button mb={6} onPress={onClose} bg="white">
           <Text color={MA_REUSSITE_CUSTOM_COLORS.Secondary}>Annuler</Text>
         </Button>
       </Actionsheet>
