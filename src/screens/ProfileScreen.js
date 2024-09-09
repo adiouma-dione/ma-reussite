@@ -1,33 +1,28 @@
-import { MaterialIcons, FontAwesome5, FontAwesome6 } from "@expo/vector-icons";
-import React, { useEffect, useState } from "react";
+import { FontAwesome5, FontAwesome6, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import * as FileSystem from "expo-file-system";
+import * as ImagePicker from "expo-image-picker";
 import {
+  Actionsheet,
   Avatar,
   Box,
+  Button,
   Center,
+  Divider,
   Heading,
+  HStack,
   Icon,
   IconButton,
-  Link,
-  ScrollView,
-  VStack,
   Text,
-  Actionsheet,
   useDisclose,
-  Button,
-  HStack,
-  Divider,
-  Toast,
-  CloseIcon,
-  useToast, // Import de Toast
+  useToast,
 } from "native-base";
-import * as ImagePicker from "expo-image-picker";
-import { getObject, storeObject, updateRecord } from "../api/apiClient"; // Import updateRecord
-import MA_REUSSITE_CUSTOM_COLORS from "../themes/variables";
-import * as FileSystem from "expo-file-system";
-import config from "../api/config";
+import React, { useEffect, useState } from "react";
 import { Alert } from "react-native"; // Ajoute cette ligne pour utiliser Alert de React Native
-import { ToastAlert } from "../components";
+import { getObject, storeObject, updateRecord } from "../api/apiClient"; // Import updateRecord
+import config from "../api/config";
+import { ProfileUserEdit, ProfileUserInfo, ToastAlert } from "../components";
+import MA_REUSSITE_CUSTOM_COLORS from "../themes/variables";
 
 const ProfileScreen = () => {
   const route = useRoute();
@@ -41,12 +36,21 @@ const ProfileScreen = () => {
     userid: "",
     role: "",
     profileImage: null,
+    name: "",
+    phone: "",
+    street: "",
   });
   const [loading, setLoading] = useState(true);
+  const [isProfileEdit, setIsProfileEdit] = useState(false);
+
+  useEffect(() => {
+    if (route?.params?.edit) setIsProfileEdit(true);
+  }, [route]);
 
   useEffect(() => {
     const fetchUser = async () => {
       const user = await getObject("connectedUser");
+      console.log("User...", user.name);
       setConnectedUser(user);
       setLoading(false);
     };
@@ -69,6 +73,10 @@ const ProfileScreen = () => {
         connectedUser.userid[0], // ID de l'utilisateur
         {
           image_1920: imageBase64, // Champ pour l'image de profil dans Odoo (taille 1920px)
+          // image_1024: imageBase64,
+          // image_512: imageBase64,
+          // image_256: imageBase64,
+          // image_128: imageBase64,
         }
       );
 
@@ -224,31 +232,12 @@ const ProfileScreen = () => {
           {connectedUser && connectedUser.userid[1]}
         </Heading>
       </Center>
-      <ScrollView
-        mt={2}
-        space={2}
-        h={"full"}
-        w={"full"}
-        contentContainerStyle={{ paddingBottom: 80 }}
-      >
-        <Box mt={4}>
-          <Heading mx={4} color={"black"} size="md">
-            Contact
-          </Heading>
-          <Box h={"full"} justifyContent={"space-between"}>
-            <VStack mx={4}>
-              <Text mt={2} color={"black"} bold>
-                Adresse email :
-              </Text>
-              <Link href={connectedUser && connectedUser.email}>
-                <Text color={"primary.500"}>
-                  {connectedUser && connectedUser.email}
-                </Text>
-              </Link>
-            </VStack>
-          </Box>
-        </Box>
-      </ScrollView>
+      <Divider bgColor={"gray.100"} h={"0.5"} mt={2} />
+      {isProfileEdit ? (
+        <ProfileUserEdit connectedUser={connectedUser} />
+      ) : (
+        <ProfileUserInfo connectedUser={connectedUser} />
+      )}
 
       <Actionsheet isOpen={isOpen} onClose={onClose}>
         <Actionsheet.Content

@@ -48,13 +48,16 @@ const LoginScreen = () => {
           password,
           config.model.users,
           [[["email", "=", email]]],
-          ["self", "craft_role", "image_1024"]
+          ["self", "craft_role", "image_1024", "name", "phone", "street"]
         );
 
         if (user.length > 0) {
           const userid = user[0].self;
           const role = user[0].craft_role;
           const imageUri = user[0].image_1024;
+          const name = user[0].name;
+          const phone = user[0].phone;
+          const street = user[0].street;
 
           let userData;
           switch (role) {
@@ -83,7 +86,7 @@ const LoginScreen = () => {
                 sessionId,
                 password,
                 config.model.craftTeachers,
-                [[["work_contact_id", "=", userid[0]]]],
+                [[["work_contact_id", "in", userid]]],
                 ["image_1024"]
               );
               break;
@@ -112,6 +115,9 @@ const LoginScreen = () => {
             userid: userid,
             role: role,
             profileImage: profileImage,
+            name: name,
+            phone: phone,
+            street: street,
           });
 
           setConnectedUser({
@@ -121,6 +127,9 @@ const LoginScreen = () => {
             userid: userid,
             role: role,
             profileImage: profileImage,
+            name: name,
+            phone: phone,
+            street: street,
           });
         }
       } else {
