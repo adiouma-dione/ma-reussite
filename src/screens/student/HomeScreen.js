@@ -1,21 +1,18 @@
 import { useNavigation, useRoute } from "@react-navigation/native";
-import {
-  Actionsheet,
-  Box,
-  ScrollView,
-  Text,
-  VStack,
-  useDisclose,
-} from "native-base";
+import { Box, ScrollView, VStack, useDisclose } from "native-base";
 import { default as React, useEffect, useState } from "react";
 import { Calendar } from "react-native-calendars";
 import { getObject, jsonrpcRequest } from "../../api/apiClient";
 import config from "../../api/config";
 import { CalendarCard } from "../../components";
 import BackgroundWrapper from "../../components/BackgroundWrapper";
-import MA_REUSSITE_CUSTOM_COLORS from "../../themes/variables";
+import { EventsActionSheet } from "../../components/EventsActionSheet";
+import { useThemeContext } from "../../hooks/ThemeContext";
 import CalendarLocalConfig from "../../utils/CalendarLocalConfig";
+import CalendarTheme from "../../utils/CalendarTheme";
 import { formatOdooEvents } from "../../utils/MarkedDatesFormatage";
+import { useAppContext } from "../../hooks/AppProvider";
+import MA_REUSSITE_CUSTOM_COLORS from "../../themes/variables";
 
 CalendarLocalConfig;
 
@@ -23,38 +20,56 @@ const HomeScreen = () => {
   const navigation = useNavigation();
   const { isOpen, onOpen, onClose } = useDisclose();
   const route = useRoute();
-  const [sessionId, setSessionId] = useState(null);
-  const [password, setPassword] = useState(null);
-  const [userid, setUserid] = useState(null);
+  // const [sessionId, setSessionId] = useState(null);
+  // const [password, setPassword] = useState(null);
+  // const [userid, setUserid] = useState(null);
   const [events, setEvents] = useState(null);
   const [markedDate, setMarkedDate] = useState({});
   const [todaysEvents, setTodaysEvents] = useState([]);
   const [today, setToday] = useState();
   const [selectedDay, setSelectedDay] = useState("");
   const [selectedDayEvents, setSelectedDayEvents] = useState([]);
-
+  const { isDarkMode } = useThemeContext();
+  const [connectedUser, setConnectedUser] = useState(null);
+  const { selectedChild, setSelectedChild } = useAppContext();
   useEffect(() => {
     const fetchConnectedUser = async () => {
       try {
-        const connectedUser = await getObject("connectedUser");
-        const { sessionId, email, password, userid } = connectedUser;
-        setSessionId(sessionId);
-        setPassword(password);
-        setUserid(userid[0]);
+        const storedUser = await getObject("connectedUser");
+        // const { sessionId, email, password, userid } = storedUser;
+        setConnectedUser(storedUser);
+        // setSessionId(sessionId);
+        // setPassword(password);
+        // setUserid(userid[0]);
       } catch (error) {}
     };
-    // const connectedUser = route?.params;
-    if (!sessionId) fetchConnectedUser();
-  }, [sessionId]);
+    if (!connectedUser) fetchConnectedUser();
+  }, [connectedUser]);
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
+        if (!connectedUser || !connectedUser.sessionId || !selectedChild)
+          return;
+
+        let domain = [];
+        switch (connectedUser.role) {
+          case "parent":
+            if (!selectedChild?.contact_id) return;
+            domain = [["partner_ids", "=", selectedChild.contact_id[0]]];
+            break;
+          case "student":
+            domain = [["partner_ids", "=", connectedUser.partnerid[0]]];
+            break;
+          default:
+            console.error("Unsupported role:", connectedUser.role);
+            return;
+        }
         const eventsData = await jsonrpcRequest(
-          sessionId,
-          password,
+          connectedUser.sessionId,
+          connectedUser.password,
           config.model.craftSession,
-          [[["partner_ids", "=", userid]]],
+          [domain],
           [
             "classroom_id",
             "recurrency",
@@ -71,10 +86,8 @@ const HomeScreen = () => {
         console.error("Error fetching events:", error);
       }
     };
-    if (sessionId && password) {
-      fetchEvents();
-    }
-  }, [sessionId, password, userid]);
+    if (connectedUser) fetchEvents();
+  }, [connectedUser]);
 
   useEffect(() => {
     if (events) {
@@ -96,18 +109,19 @@ const HomeScreen = () => {
   }, [markedDate]);
 
   return (
-    <Box flex={1} bg={"white"}>
-      <BackgroundWrapper navigation={navigation}>
+    <BackgroundWrapper navigation={navigation}>
+      <Box flex={1} bg={"transparent"}>
         <Box
           mt={4}
           mb={6}
           mx={"auto"}
           width={"90%"}
           borderRadius={10}
-          shadow={"9"}
+          shadow={isDarkMode ? "1" : "9"}
           overflow={"hidden"}
         >
           <Calendar
+            key={isDarkMode ? "dark" : "light"}
             markingType={"multi-dot"}
             onDayPress={(day) => {
               const currentDaySelected = new Date(day.timestamp).getDay();
@@ -124,13 +138,7 @@ const HomeScreen = () => {
             disableMonthChange={false}
             firstDay={1}
             markedDates={markedDate}
-            theme={{
-              selectedDayBackgroundColor: MA_REUSSITE_CUSTOM_COLORS.Primary,
-              todayTextColor: "white",
-              todayBackgroundColor: MA_REUSSITE_CUSTOM_COLORS.Primary,
-              arrowColor: MA_REUSSITE_CUSTOM_COLORS.Primary,
-              monthTextColor: MA_REUSSITE_CUSTOM_COLORS.Primary,
-            }}
+            theme={CalendarTheme(isDarkMode)}
           />
         </Box>
         <ScrollView flexGrow={1} h={"100%"} w={"90%"} mx={"auto"} mb={"10%"}>
@@ -150,50 +158,19 @@ const HomeScreen = () => {
           </VStack>
         </ScrollView>
 
-        <Actionsheet
+        <EventsActionSheet
+          isDarkMode={isDarkMode}
+          selectedDayEvents={selectedDayEvents}
+          setSelectedDayEvents={setSelectedDayEvents}
+          today={today}
           isOpen={isOpen}
           onClose={() => {
             setSelectedDayEvents([]);
             onClose();
           }}
-        >
-          <Actionsheet.Content bg={"white"}>
-            <Box w="100%" h={60} px={4} justifyContent="center">
-              <Text
-                textAlign={"center"}
-                color={"black"}
-                fontSize="lg"
-                fontWeight="bold"
-              >
-                Événements
-              </Text>
-            </Box>
-            <ScrollView
-              w="100%"
-              flexGrow={1}
-              mx={"auto"}
-              // mb={"5%"}
-              contentContainerStyle={{ paddingBottom: 40 }}
-            >
-              <VStack space={4} px={4}>
-                {selectedDayEvents &&
-                  selectedDayEvents.map((eventMarked, index) => (
-                    <CalendarCard
-                      key={index}
-                      tag={eventMarked.tag}
-                      date={today}
-                      time={eventMarked.time}
-                      subject={eventMarked.subject}
-                      teacher={eventMarked.teacher}
-                      classroom={eventMarked.classroom}
-                    />
-                  ))}
-              </VStack>
-            </ScrollView>
-          </Actionsheet.Content>
-        </Actionsheet>
-      </BackgroundWrapper>
-    </Box>
+        />
+      </Box>
+    </BackgroundWrapper>
   );
 };
 

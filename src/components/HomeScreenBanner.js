@@ -15,8 +15,9 @@ import React, { useEffect, useState } from "react";
 import { getObject } from "../api/apiClient";
 import { useAppContext } from "../hooks/AppProvider";
 import MA_REUSSITE_CUSTOM_COLORS from "../themes/variables";
+import { useThemeContext } from "../hooks/ThemeContext";
 
-function HomeScreenBanner() {
+const HomeScreenBanner = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const [connectedUser, setConnectedUser] = useState({
@@ -30,6 +31,8 @@ function HomeScreenBanner() {
   const [loading, setLoading] = useState(true);
   const [account, setAccount] = useState();
   const { selectedChild, setSelectedChild } = useAppContext();
+  const { isDarkMode } = useThemeContext();
+  // const [imgBanner, setImgBanner] = useState("");
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -48,28 +51,32 @@ function HomeScreenBanner() {
     if (connectedUser?.role === "parent" && selectedChild?.contact_id) {
       setAccount(
         <Text color={"white"} fontWeight={"medium"}>
-          {selectedChild.contact_id[1]}
+          {selectedChild?.contact_id[1]}
         </Text>
       );
     }
   }, [connectedUser?.role, selectedChild]);
 
-  // useEffect(() => {
-  //   console.log("connectedUser...", connectedUser.profileImage);
-  // }, [connectedUser]);
-
   return (
-    <Box bg="white">
+    <Box bg={isDarkMode ? "black" : "white"}>
       <VStack>
         <HStack>
           <Image
+            key={isDarkMode ? "dark" : "light"}
             size="sm"
             w={"70%"}
             ml={2}
-            source={require("../../assets/images/ma_reussite_other_screens.png")}
+            source={
+              isDarkMode
+                ? require("../../assets/images/ma_reussite_login_screen.png")
+                : require("../../assets/images/ma_reussite_other_screens.png")
+            }
             alt="Alternate Text"
           />
-          <Pressable m={"auto"} onPress={() => navigation.openDrawer()}>
+          <Pressable
+            m={"auto"}
+            onPress={() => navigation.openDrawer && navigation.openDrawer()}
+          >
             {loading ? (
               <Avatar size="md" source={{ uri: null }} />
             ) : (
@@ -99,7 +106,9 @@ function HomeScreenBanner() {
                   _pressed={{
                     bg: "primary.600:alpha.20",
                   }}
-                  onPress={() => navigation.openDrawer()}
+                  onPress={() =>
+                    navigation.openDrawer && navigation.openDrawer()
+                  } // @ici pourquoi j'ai l'erreur suivant : TypeError: navigation.openDrawer is not a function (it is undefined), js engine: hermes quand la banniere se trouve sur une navigation type stackNavigation ?
                 />
               </Avatar>
             )}
@@ -121,6 +130,6 @@ function HomeScreenBanner() {
       </VStack>
     </Box>
   );
-}
+};
 
 export default HomeScreenBanner;

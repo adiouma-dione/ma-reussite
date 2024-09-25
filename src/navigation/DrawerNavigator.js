@@ -7,6 +7,7 @@ import { AdminTabNavigator } from "./AdminTabNavigator";
 import CustomDrawerContent from "../components/CustomDrawerContent";
 import { getObject } from "../api/apiClient";
 import { useRoute } from "@react-navigation/native";
+import { useThemeContext } from "../hooks/ThemeContext";
 
 const Drawer = createDrawerNavigator();
 
@@ -15,23 +16,7 @@ const DrawerNavigator = () => {
   const [connectedUser, setConnectedUser] = useState(null);
   const [childrenList, setChildrenList] = useState([]);
   const [selectedChild, setSelectedChild] = useState(null);
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      // console.log("ok...");
-
-      try {
-        const user = await getObject("connectedUser");
-        if (user) {
-          setConnectedUser(user);
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
-
-    fetchUserData();
-  }, [connectedUser]);
+  const { isDarkMode } = useThemeContext();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -41,7 +26,6 @@ const DrawerNavigator = () => {
           setConnectedUser(user);
 
           if (user.role === "parent") {
-            // console.log("connectedUser role:", user.role);
             const children = await getObject("children");
             setChildrenList(children || []);
 
@@ -84,6 +68,7 @@ const DrawerNavigator = () => {
         drawerStyle: {
           margin: 0,
           padding: 0,
+          backgroundColor: isDarkMode ? "#000" : "#fff",
         },
         drawerType: "front",
       }}

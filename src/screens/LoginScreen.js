@@ -1,7 +1,8 @@
 import { useNavigation } from "@react-navigation/native";
 import { Formik } from "formik";
-import { Box, StatusBar, Text, useToast, VStack } from "native-base";
+import { Box, StatusBar, Text, VStack } from "native-base";
 import React, { useEffect, useRef, useState } from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
   authenticate,
   jsonrpcRequest,
@@ -10,8 +11,8 @@ import {
 } from "../api/apiClient";
 import config from "../api/config";
 import { CustomButton, CustomInput, LoginScreenBanner } from "../components";
+import { useThemeContext } from "../hooks/ThemeContext";
 import { loginValidationSchema } from "../validation/formValidation";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 const LoginScreen = () => {
   const input1Ref = useRef(null);
@@ -29,6 +30,7 @@ const LoginScreen = () => {
   });
   const [selectedChild, setSelectedChild] = useState(null);
   const [children, setChildren] = useState([]);
+  const { isDarkMode } = useThemeContext();
 
   const getStudentIds = (data) => {
     return data.map((fetchedChild) => fetchedChild.child_id[0]);
@@ -52,6 +54,8 @@ const LoginScreen = () => {
         );
 
         if (user.length > 0) {
+          // console.log("user...", user);
+
           const userid = user[0].self;
           const role = user[0].craft_role;
           const imageUri = user[0].image_1024;
@@ -224,9 +228,12 @@ const LoginScreen = () => {
 
   return (
     <SafeAreaView flex={1}>
-      <StatusBar backgroundColor={"white"} barStyle={"dark-content"} />
+      <StatusBar
+        backgroundColor={isDarkMode ? "black" : "white"}
+        barStyle={isDarkMode ? "light-content" : "dark-content"}
+      />
       <LoginScreenBanner />
-      <Box height={"100%"}>
+      <Box height={"100%"} bg={isDarkMode ? "black" : "white"}>
         <VStack
           width={"full"}
           minH={"80%"}
@@ -235,7 +242,7 @@ const LoginScreen = () => {
         >
           <Box mx={"auto"} width="80%" display={"flex"}>
             <Box alignItems="center">
-              <Text color={"black"} fontSize="2xl" bold>
+              <Text color={isDarkMode ? "white" : "black"} fontSize="2xl" bold>
                 S'identifier
               </Text>
             </Box>

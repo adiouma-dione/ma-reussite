@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { Button, NativeBaseProvider } from "native-base";
-import { WebView } from "react-native-webview";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SplashScreen from "expo-splash-screen";
-import useFonts from "./src/hooks/useFonts";
-import AppNavigator from "./src/navigation/AppNavigator";
-import customTheme from "./src/themes/customTheme";
-// import { SelectedChildProvider } from "./src/hooks/SelectedChildContext";
+import { Button, NativeBaseProvider } from "native-base";
+import React, { useEffect, useState } from "react";
+import { WebView } from "react-native-webview";
+import { AppWithTheme } from "./src/components";
+import MA_REUSSITE_CUSTOM_COLORS from "./src/themes/variables";
+import { ThemeProvider, useFonts } from "./src/hooks";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -21,13 +20,19 @@ const App = () => {
 
   const PrivacyPolicyScreen = ({ onAccept }) => {
     return (
-      <NativeBaseProvider isSSR theme={customTheme}>
+      <NativeBaseProvider>
         <WebView
           source={{ uri: "https://ma-reussite-privacy.netlify.app/" }}
           style={{ flex: 1, marginTop: "10%", marginBottom: "5%" }}
           onMessage={handleWebViewMessage}
         />
-        <Button w={"50%"} mx={"auto"} mb={"2%"} onPress={onAccept}>
+        <Button
+          w={"50%"}
+          mx={"auto"}
+          mb={"2%"}
+          onPress={onAccept}
+          bg={MA_REUSSITE_CUSTOM_COLORS.Primary}
+        >
           J'accepte
         </Button>
       </NativeBaseProvider>
@@ -68,11 +73,9 @@ const App = () => {
   }
 
   return (
-    <NativeBaseProvider isSSR theme={customTheme}>
-      {/* <SelectedChildProvider> */}
-      <AppNavigator />
-      {/* </SelectedChildProvider> */}
-    </NativeBaseProvider>
+    <ThemeProvider>
+      <AppWithTheme />
+    </ThemeProvider>
   );
 };
 

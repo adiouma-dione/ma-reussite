@@ -17,6 +17,9 @@ import { useAppContext } from "../../hooks/AppProvider";
 import MA_REUSSITE_CUSTOM_COLORS from "../../themes/variables";
 import CalendarLocalConfig from "../../utils/CalendarLocalConfig";
 import { formatOdooEvents } from "../../utils/MarkedDatesFormatage";
+import { useThemeContext } from "../../hooks/ThemeContext";
+import { EventsActionSheet } from "../../components/EventsActionSheet";
+import CalendarTheme from "../../utils/CalendarTheme";
 
 CalendarLocalConfig;
 
@@ -33,6 +36,7 @@ const HomeScreen = () => {
   const [connectedUser, setConnectedUser] = useState(null);
   const [childrenList, setChildrenList] = useState([]);
   const { selectedChild, setSelectedChild } = useAppContext();
+  const { isDarkMode } = useThemeContext();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -125,18 +129,19 @@ const HomeScreen = () => {
   }, [markedDate]);
 
   return (
-    <Box flex={1} bg={"white"}>
-      <BackgroundWrapper navigation={navigation}>
+    <BackgroundWrapper navigation={navigation}>
+      <Box flex={1} bg={"transparent"}>
         <Box
           mt={4}
           mb={6}
           mx={"auto"}
           width={"90%"}
           borderRadius={10}
-          shadow={"9"}
+          shadow={isDarkMode ? "1" : "9"}
           overflow={"hidden"}
         >
           <Calendar
+            key={isDarkMode ? "dark" : "light"}
             markingType={"multi-dot"}
             onDayPress={(day) => {
               if (markedDate[day.dateString] !== undefined) {
@@ -149,13 +154,7 @@ const HomeScreen = () => {
             disableMonthChange={false}
             firstDay={1}
             markedDates={markedDate}
-            theme={{
-              selectedDayBackgroundColor: MA_REUSSITE_CUSTOM_COLORS.Primary,
-              todayTextColor: "white",
-              todayBackgroundColor: MA_REUSSITE_CUSTOM_COLORS.Primary,
-              arrowColor: MA_REUSSITE_CUSTOM_COLORS.Primary,
-              monthTextColor: MA_REUSSITE_CUSTOM_COLORS.Primary,
-            }}
+            theme={CalendarTheme(isDarkMode)}
           />
         </Box>
         <ScrollView flexGrow={1} h={"100%"} w={"90%"} mx={"auto"} mb={"10%"}>
@@ -175,49 +174,19 @@ const HomeScreen = () => {
           </VStack>
         </ScrollView>
 
-        <Actionsheet
+        <EventsActionSheet
+          isDarkMode={isDarkMode}
+          selectedDayEvents={selectedDayEvents}
+          setSelectedDayEvents={setSelectedDayEvents}
+          today={today}
           isOpen={isOpen}
           onClose={() => {
             setSelectedDayEvents([]);
             onClose();
           }}
-        >
-          <Actionsheet.Content bg={"white"}>
-            <Box w="100%" h={60} px={4} justifyContent="center">
-              <Text
-                textAlign={"center"}
-                color={"black"}
-                fontSize="lg"
-                fontWeight="bold"
-              >
-                Événements
-              </Text>
-            </Box>
-            <ScrollView
-              w="100%"
-              flexGrow={1}
-              mx={"auto"}
-              contentContainerStyle={{ paddingBottom: 40 }}
-            >
-              <VStack space={4} px={4}>
-                {selectedDayEvents &&
-                  selectedDayEvents.map((eventMarked, index) => (
-                    <CalendarCard
-                      key={index}
-                      tag={eventMarked.tag}
-                      date={today}
-                      time={eventMarked.time}
-                      subject={eventMarked.subject}
-                      teacher={eventMarked.teacher}
-                      classroom={eventMarked.classroom}
-                    />
-                  ))}
-              </VStack>
-            </ScrollView>
-          </Actionsheet.Content>
-        </Actionsheet>
-      </BackgroundWrapper>
-    </Box>
+        />
+      </Box>
+    </BackgroundWrapper>
   );
 };
 
