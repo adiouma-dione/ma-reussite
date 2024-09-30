@@ -75,7 +75,11 @@ const HomeScreenBanner = () => {
           />
           <Pressable
             m={"auto"}
-            onPress={() => navigation.openDrawer && navigation.openDrawer()}
+            onPress={() =>
+              navigation.openDrawer
+                ? navigation.openDrawer()
+                : navigation.navigate("Profil")
+            }
           >
             {loading ? (
               <Avatar size="md" source={{ uri: null }} />
@@ -107,7 +111,9 @@ const HomeScreenBanner = () => {
                     bg: "primary.600:alpha.20",
                   }}
                   onPress={() =>
-                    navigation.openDrawer && navigation.openDrawer()
+                    navigation.openDrawer
+                      ? navigation.openDrawer()
+                      : navigation.navigate("Profil")
                   }
                 />
               </Avatar>

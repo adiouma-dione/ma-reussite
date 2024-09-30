@@ -10,9 +10,15 @@ import {
   storeObject,
 } from "../api/apiClient";
 import config from "../api/config";
-import { CustomButton, CustomInput, LoginScreenBanner } from "../components";
+import {
+  BackgroundWrapper,
+  CustomButton,
+  CustomInput,
+  LoginScreenBanner,
+} from "../components";
 import { useThemeContext } from "../hooks/ThemeContext";
 import { loginValidationSchema } from "../validation/formValidation";
+import MA_REUSSITE_CUSTOM_COLORS from "../themes/variables";
 
 const LoginScreen = () => {
   const input1Ref = useRef(null);
@@ -208,7 +214,6 @@ const LoginScreen = () => {
           [],
           ["id", "symbol"]
         );
-
         storeObject("currencies", currencies);
       } catch (error) {
         console.error("Error fetching role:", error);
@@ -233,7 +238,10 @@ const LoginScreen = () => {
         barStyle={isDarkMode ? "light-content" : "dark-content"}
       />
       <LoginScreenBanner />
-      <Box height={"100%"} bg={isDarkMode ? "black" : "white"}>
+      <Box
+        height={"100%"}
+        bg={isDarkMode ? "dark.50" : MA_REUSSITE_CUSTOM_COLORS.White}
+      >
         <VStack
           width={"full"}
           minH={"80%"}

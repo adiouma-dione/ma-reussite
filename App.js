@@ -3,9 +3,10 @@ import * as SplashScreen from "expo-splash-screen";
 import { Button, NativeBaseProvider } from "native-base";
 import React, { useEffect, useState } from "react";
 import { WebView } from "react-native-webview";
-import { AppWithTheme } from "./src/components";
+import AppWithTheme  from "./src/components/AppWithTheme";
 import MA_REUSSITE_CUSTOM_COLORS from "./src/themes/variables";
-import { ThemeProvider, useFonts } from "./src/hooks";
+import useFonts from "./src/hooks/useFonts";
+import ThemeProvider from "./src/hooks/ThemeContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -23,6 +24,9 @@ const App = () => {
       <NativeBaseProvider>
         <WebView
           source={{ uri: "https://ma-reussite-privacy.netlify.app/" }}
+          // source={{
+          //   uri: "https://ma-reussite2.erp.craftschoolship.com/policy/agreement",
+          // }}
           style={{ flex: 1, marginTop: "10%", marginBottom: "5%" }}
           onMessage={handleWebViewMessage}
         />
